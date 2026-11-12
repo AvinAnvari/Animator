@@ -1,0 +1,1049 @@
+/* All styling for the Animator app. The .gleam files only attach class names. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+/* ── Layout: two columns ─────────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a2e;
+  color: #d4c5a0;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+/* Left column: the code editor. */
+.code-col {
+  width: 42%;
+  min-width: 320px;
+  max-width: 720px;
+  flex-shrink: 0;
+  display: flex;
+  border-right: 1px solid #3a3a5e;
+  background: #0f0f1e;
+}
+
+/* The code column stays in the DOM when collapsed, so CodeMirror keeps its
+   state; hiding it gives the right column the full width. */
+.app.code-hidden .code-col { display: none; }
+
+/* A small emoji button (the code pane's collapse toggle, and the playback
+   controls once they exist). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 5px 8px;
+}
+.icon-btn:hover { background: #3a3a5e; }
+
+/* ── Code panel (left column) ───────────────────────────────────────────── */
+
+.code-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1a1a3e;
+  border-bottom: 1px solid #3a3a5e;
+}
+.code-title {
+  color: #e8d8b0;
+  font-family: 'Georgia', serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+/* Wrapper holding the editor. */
+.code-editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+/* CodeMirror mount node: grows to fill the panel. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: #0d0d1a;
+}
+.code-editor .cm-editor { width: 100%; height: 100%; }
+
+/* Collapsible reference of the built-ins available to draw functions. */
+.reference {
+  margin: 8px 14px 0;
+  border: 1px solid #3a3a5e;
+  border-radius: 4px;
+  background: #0d0d1a;
+  overflow: hidden;
+}
+.reference-summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  color: #b8a888;
+  font-family: monospace;
+  font-size: 12px;
+  user-select: none;
+}
+.reference-summary:hover { color: #e8d8b0; }
+.reference-body {
+  padding: 4px 12px 10px;
+  border-top: 1px solid #3a3a5e;
+}
+.reference-group { margin-top: 8px; }
+.reference-group-title {
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.reference-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 1px 0;
+}
+.reference-sig {
+  color: #89ddff;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre;
+}
+.reference-desc { color: #6a7a8a; font-size: 11px; }
+
+/* ── Animation area (right column) ──────────────────────────────────────── */
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a14;
+}
+
+/* The box the canvas fits itself into (see .canvas). It takes all the space
+   the area's other in-flow children leave over. */
+.canvas-fit {
+  flex: 1 1 0;
+  min-height: 0;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+/* Button that reveals the code column again when it is hidden. */
+.reveal-code {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+/* A centred square that fits the (possibly non-square) animation area. Give your
+   <canvas> this class, so that drawings aren't stretched. */
+.canvas {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+}
+
+/* Compact error strip: sits just above the playback stack inside the dock. */
+.error-banner {
+  margin: 0 0 8px;
+  padding: 10px 14px;
+  max-height: 28vh;
+  overflow: auto;
+  border: 1px solid #6a3a4a;
+  border-radius: 8px;
+  background: rgba(40, 16, 24, 0.94);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #f0b8c0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Shape + speed controls along the bottom of the animation area, below the
+   canvas rather than over it, so they never hide part of a drawing or maze;
+   the canvas shrinks to the space above them (see .canvas-fit). It stays
+   positioned so the tip and the drawing pop-up can sit just above it. */
+.playback-dock {
+  position: relative;
+  z-index: 6;
+  flex-shrink: 0;
+  margin: 0 12px 12px;
+}
+
+.playback-tip-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 36px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.playback-tip {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  padding: 7px 12px;
+  border: 1px solid #4a4a8a;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(180deg, rgba(36, 36, 58, 0.96), rgba(22, 22, 40, 0.96));
+  color: #d4c5a0;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  transform: translateY(110%);
+  opacity: 0;
+  transition: transform 0.28s ease, opacity 0.22s ease;
+}
+
+.playback-tip.open {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.playback-stack {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.drawing-menu {
+  padding: 8px 14px;
+  border: 1px solid #3a3a5e;
+  border-bottom: none;
+  background: linear-gradient(180deg, rgba(30, 30, 52, 0.96), rgba(18, 18, 34, 0.96));
+  backdrop-filter: blur(8px);
+}
+
+.drawing-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 7px 32px 7px 10px;
+  border: 1px solid #4a4a7a;
+  border-radius: 6px;
+  background-color: rgba(12, 12, 24, 0.9);
+  background-image: linear-gradient(45deg, transparent 50%, #8a8aca 50%),
+    linear-gradient(135deg, #8a8aca 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 11px) calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  color: #d4c5a0;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.drawing-select:focus {
+  outline: none;
+  border-color: #7a7aba;
+}
+
+.drawing-select option {
+  background: #161628;
+  color: #d4c5a0;
+}
+
+.playback {
+  position: relative;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid #3a3a5e;
+  background: linear-gradient(180deg, rgba(26, 26, 46, 0.92), rgba(12, 12, 24, 0.95));
+  backdrop-filter: blur(8px);
+}
+
+.transport {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Fixed size so play/pause glyph swaps don't resize the playback bar. */
+.transport-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  flex: 0 0 32px;
+}
+
+.transport-glyph {
+  display: inline-flex;
+  width: 1.2em;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.play-icon {
+  font-size: 12px;
+  transform: translateX(1px);
+}
+
+/* Thin CSS pause bars instead of a heavy emoji. */
+.pause-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 12px;
+  height: 12px;
+}
+
+.pause-bar {
+  display: block;
+  width: 2px;
+  height: 10px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.slider {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.slider-label {
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.slider-value-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 5.5ch;
+}
+
+.slider-number {
+  width: 5.5ch;
+  margin: 0;
+  padding: 3px 4px;
+  border: 1px solid #4a4a8a;
+  border-radius: 4px;
+  background: #121222;
+  color: #e8d8b0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  line-height: 1.2;
+  /* Plain text field: click to type; no spinner / wheel stepping. */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.slider-number:focus {
+  outline: none;
+  border-color: #d4c5a0;
+  caret-color: #e8d8b0;
+}
+
+.slider-suffix {
+  color: #e8d8b0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+.slider-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2a2a4a, #4a4a8a 50%, #2a2a4a);
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f2e6c4, #d4c5a0 55%, #a89060);
+  border: 1px solid #8a7848;
+  box-shadow: 0 0 0 3px rgba(212, 197, 160, 0.18);
+  cursor: grab;
+}
+
+.slider-input::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f2e6c4, #d4c5a0 55%, #a89060);
+  border: 1px solid #8a7848;
+  box-shadow: 0 0 0 3px rgba(212, 197, 160, 0.18);
+  cursor: grab;
+}
+
+.slider-input:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(212, 197, 160, 0.28);
+}
+
+.slider-input:hover::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgba(212, 197, 160, 0.28);
+}
+
+
+/* ── Maze Mode ──────────────────────────────────────────────────────────── */
+
+/* The drawing menu and maze menu put their select beside a row of buttons. */
+.drawing-menu {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.drawing-menu .drawing-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.maze-btn {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.maze-btn.active {
+  background: #4a4a8a;
+  border-color: #d4c5a0;
+  color: #f2e6c4;
+}
+
+.maze-hint {
+  padding: 6px 14px;
+  border: 1px solid #3a3a5e;
+  border-top: none;
+  border-bottom: none;
+  background: rgba(18, 18, 34, 0.96);
+  color: #8a8aca;
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+/* The last row of the maze controls closes off the stack's border. */
+.maze-hint:last-child {
+  border-bottom: 1px solid #3a3a5e;
+}
+
+.maze-banner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 7;
+  transform: translate(-50%, -50%);
+  min-width: 240px;
+  padding: 20px 28px;
+  border: 1px solid #f2c14e;
+  border-radius: 10px;
+  background: rgba(18, 18, 34, 0.94);
+  box-shadow: 0 0 40px rgba(242, 193, 78, 0.25), 0 8px 24px rgba(0, 0, 0, 0.45);
+  color: #d4c5a0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  text-align: center;
+  animation: maze-pop 0.3s ease-out;
+}
+
+.maze-title {
+  color: #f2c14e;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.maze-stats {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.maze-record {
+  margin-top: 4px;
+  color: #8a8aca;
+  font-size: 12px;
+}
+
+.maze-record.new {
+  color: #5fd38d;
+}
+
+.maze-banner-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+@keyframes maze-pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+
+/* ── Drawing menu ───────────────────────────────────────────────────────── */
+
+/* The native <select> stays rendered (so tools that operate it, like
+   Gradescope's tests, still can) but is invisible and takes no space. */
+.drawing-select.native-select {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The button that opens the pop-up list, styled like the old select. */
+.drawing-trigger {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid #4a4a7a;
+  border-radius: 6px;
+  background: rgba(12, 12, 24, 0.9);
+  color: #d4c5a0;
+  font-family: monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drawing-trigger:hover,
+.drawing-trigger[aria-expanded="true"] {
+  border-color: #7a7aba;
+}
+
+.drawing-trigger-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawing-trigger-arrow {
+  color: #8a8aca;
+}
+
+/* Catches clicks outside the pop-up to close it. */
+.drawing-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+
+/* The pop-up list itself, rising from just above the controls. */
+.drawing-popup {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 21;
+  width: min(340px, 100%);
+  padding: 6px;
+  border: 1px solid #4a4a8a;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(34, 34, 58, 0.98), rgba(18, 18, 34, 0.98));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  font-family: monospace;
+  animation: drawing-popup-in 0.16s ease-out;
+}
+
+.drawing-popup-title {
+  padding: 6px 10px 8px;
+  color: #8a8aca;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.drawing-popup-list {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.drawing-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #d4c5a0;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.drawing-item:hover,
+.drawing-item:focus-visible {
+  outline: none;
+  background: rgba(74, 74, 138, 0.45);
+}
+
+.drawing-item.current {
+  background: rgba(212, 197, 160, 0.12);
+  color: #f2e6c4;
+}
+
+.drawing-item-mark {
+  width: 1.2em;
+  flex-shrink: 0;
+  color: #f2c14e;
+  text-align: center;
+}
+
+.drawing-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawing-item-meta {
+  flex-shrink: 0;
+  color: #6a6a9a;
+  font-size: 11px;
+}
+
+.drawing-item.new {
+  margin-top: 4px;
+  border-top: 1px solid #3a3a5e;
+  border-radius: 0 0 6px 6px;
+  color: #8a8aca;
+}
+
+@keyframes drawing-popup-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* A drawing in the pop-up: the item that opens it, plus a delete button for
+   drawings you made. */
+.drawing-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.drawing-row .drawing-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawing-delete {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6a6a9a;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.45;
+}
+
+.drawing-row:hover .drawing-delete,
+.drawing-delete:focus-visible {
+  opacity: 1;
+}
+
+.drawing-delete:hover,
+.drawing-delete:focus-visible {
+  outline: none;
+  background: rgba(214, 90, 110, 0.2);
+  color: #ff8a9a;
+}
+
+/* The row asking whether to delete a drawing. */
+.drawing-row.confirm {
+  gap: 6px;
+  padding: 4px 4px 4px 10px;
+  border-radius: 6px;
+  background: rgba(214, 90, 110, 0.14);
+  animation: drawing-popup-in 0.14s ease-out;
+}
+
+.drawing-confirm-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #f2d0d6;
+  font-size: 12px;
+}
+
+.drawing-confirm-btn {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border: 1px solid #4a4a8a;
+  border-radius: 5px;
+  background: #2a2a4a;
+  color: #d4c5a0;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.drawing-confirm-btn:hover,
+.drawing-confirm-btn:focus-visible {
+  outline: none;
+  background: #3a3a5e;
+}
+
+.drawing-confirm-btn.danger {
+  border-color: #a8475a;
+  background: #6a2a3a;
+  color: #ffd6dd;
+}
+
+.drawing-confirm-btn.danger:hover,
+.drawing-confirm-btn.danger:focus-visible {
+  background: #8a3448;
+}
+
+/* The pop-up's new-drawing name field. */
+.drawing-name-form {
+  margin-top: 4px;
+  padding: 6px 4px 4px;
+  border-top: 1px solid #3a3a5e;
+  animation: drawing-popup-in 0.14s ease-out;
+}
+
+.drawing-name-form .drawing-row {
+  gap: 6px;
+}
+
+.drawing-name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid #4a4a8a;
+  border-radius: 5px;
+  background: #121222;
+  color: #e8d8b0;
+  font-family: inherit;
+  font-size: 12px;
+  caret-color: #e8d8b0;
+}
+
+.drawing-name-input:focus {
+  outline: none;
+  border-color: #d4c5a0;
+}
+
+.drawing-name-input::placeholder {
+  color: #6a6a9a;
+}
+
+.drawing-confirm-btn.create {
+  border-color: #3f8a5f;
+  background: #24503a;
+  color: #d6ffe6;
+}
+
+.drawing-confirm-btn.create:hover,
+.drawing-confirm-btn.create:focus-visible {
+  background: #2f6849;
+}
+
+.drawing-name-error {
+  padding: 6px 4px 0;
+  color: #ff8a9a;
+  font-size: 11px;
+}
+
+/* ── Colour palette ─────────────────────────────────────────────────────── */
+
+.colors-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.colors-preview {
+  display: inline-flex;
+}
+
+.colors-dot {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+}
+
+.colors-dot + .colors-dot {
+  margin-left: -3px;
+}
+
+.colors-popup {
+  /* Line up with the Colors button rather than the drawing menu. */
+  left: auto;
+  right: 0;
+  width: min(360px, 100%);
+}
+
+.colors-modes {
+  display: flex;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.colors-mode {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #4a4a8a;
+  border-radius: 5px;
+  background: #1a1a30;
+  color: #8a8aca;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.colors-mode:hover {
+  background: #2a2a4a;
+}
+
+.colors-mode.active {
+  border-color: #d4c5a0;
+  background: #3a3a5e;
+  color: #f2e6c4;
+}
+
+.colors-hint {
+  padding: 8px 10px 4px;
+  color: #8a8aca;
+  font-size: 11px;
+}
+
+.colors-palette {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.colors-palette.selected {
+  background: rgba(212, 197, 160, 0.12);
+}
+
+.colors-palette-name {
+  width: 68px;
+  flex-shrink: 0;
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #d4c5a0;
+  font-family: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.colors-palette.selected .colors-palette-name {
+  color: #f2c14e;
+}
+
+.colors-swatches {
+  display: flex;
+  gap: 5px;
+}
+
+.colors-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.colors-swatch:hover {
+  transform: scale(1.15);
+}
+
+.colors-swatch.chosen {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px #4a4a8a;
+}
+
+.colors-note {
+  margin-top: 6px;
+  padding: 8px 6px 2px;
+  border-top: 1px solid #3a3a5e;
+  color: #6a6a9a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+/* Maze Mode's map menu: each map's name with a line about it beneath. */
+.maze-item-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.maze-item-about {
+  overflow: hidden;
+  color: #6a6a9a;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawing-item.current .maze-item-about {
+  color: #8a8aca;
+}
+
+/* The custom colour picker (Static mode). */
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 6px 4px 0;
+  padding: 10px 6px 4px;
+  border-top: 1px solid #3a3a5e;
+}
+
+/* Saturation runs left to right (white to the hue), value top to bottom
+   (bright to black), layered over the hue set as background-color. */
+.picker-square {
+  position: relative;
+  height: 120px;
+  border: 1px solid #4a4a8a;
+  border-radius: 6px;
+  background-image: linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, transparent);
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+}
+
+.picker-hue {
+  position: relative;
+  height: 12px;
+  border: 1px solid #4a4a8a;
+  border-radius: 999px;
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+/* The thumbs ignore the pointer so drags always land on their area. */
+.picker-thumb {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.picker-thumb.hue {
+  top: 50%;
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.picker-preview {
+  width: 28px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid #4a4a8a;
+  border-radius: 5px;
+}
+
+.picker-hex {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid #4a4a8a;
+  border-radius: 5px;
+  background: #121222;
+  color: #e8d8b0;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  text-transform: lowercase;
+}
+
+.picker-hex:focus {
+  outline: none;
+  border-color: #d4c5a0;
+}
